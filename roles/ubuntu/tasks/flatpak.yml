@@ -10,14 +10,13 @@
         state: present
 
     - name: Install flathub remote
-      command: flatpak remote --add flathub https://flathub.org/repo/flathub.flatpakref
+      command: flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
 
     # Install Podman Desktop
-    - name: Install Podman Desktop
-      flatpak:
-        name: io.containers.podman.desktop
-        remote: flathub
-        state: present
+    - name: Install Podman Desktop (Wait for remote)
+      command: sleep 60 && flatpak install --user -y io.containers.podman.desktop
+      when: inventory_hostname != 'localhost'
+
 
     # Grant access to system resources (optional)
     - name: Allow access to system resources (optional)
