@@ -13,25 +13,3 @@
   become: yes
   when: ansible_os_family == "Debian" 
 
-- name: Install Flatpak and Podman Desktop on Ubuntu
-  hosts: all
-  become: yes
-  when: ansible_os_family == "Debian"
-  tasks:
-    - name: Install flatpak
-      community.general.flatpak:
-        state: present
-
-
-    - name: Add Flathub remote
-      community.general.flatpak_remote:
-        name: flathub
-        url: https://flathub.org/repo/flathub.flatpakrepo
-        state: present
-        user: yes
-
-    - name: Install Podman Desktop
-      community.general.flatpak:
-        name: io.podman_desktop.PodmanDesktop
-        state: present
-        user: yes
