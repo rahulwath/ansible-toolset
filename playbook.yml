@@ -1,7 +1,11 @@
 - name: Install dev toolset
   hosts: all
   gather_facts: yes
-  roles:
-    - common
-    - "{{ ansible_distribution | lower }}"
-
+  tasks:
+    - name: Include OS-specific tasks
+      include_role:
+        name: "{{ item }}"
+      with_items:
+        - macos
+        - ubuntu
+      when: ansible_system == 'Darwin' if item == 'macos' else ansible_os_family == 'Debian' if item == 'ubuntu' else False
