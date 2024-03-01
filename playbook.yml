@@ -2,10 +2,12 @@
   hosts: all
   gather_facts: yes
   tasks:
-    - name: Include OS-specific tasks
+    - name: Include OS-specific tasks for macOS
       include_role:
-        name: "{{ item }}"
-      with_items:
-        - macos
-        - ubuntu
-      when: ansible_system == 'Darwin' if item == 'macos' else ansible_os_family == 'Debian' if item == 'ubuntu' else False 
+        name: macos
+      when: ansible_system == 'Darwin'
+
+    - name: Include OS-specific tasks for Ubuntu
+      include_role:
+        name: ubuntu
+      when: ansible_os_family == 'Debian'
