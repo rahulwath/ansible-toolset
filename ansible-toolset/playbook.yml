@@ -1,0 +1,7 @@
+- name: Install dev toolset
+  hosts: all
+  gather_facts: yes
+  roles:
+    - common
+    - "{{ ansible_distribution | lower }}"
+

@@ -1,0 +1,7 @@
+---
+- name: Ensure Python is installed
+  raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+- name: Install pip
+  raw: test -e /usr/local/bin/pip || (curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py)
+

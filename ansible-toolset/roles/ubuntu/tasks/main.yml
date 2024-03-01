@@ -1,0 +1,15 @@
+---
+- name: Install Podman on Ubuntu
+  package:
+    name: podman
+    state: present
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install podman-compose on Ubuntu
+  apt:
+    name: podman-compose
+    state: present
+  become: yes
+  when: ansible_os_family == "Debian"
+
