@@ -1,24 +1,25 @@
 #!/bin/bash
 
-# Function to install Ansible
-install_ansible() {
-    echo "Installing Ansible..."
-    if [[ $(uname) == "Darwin" ]]; then
-        brew install ansible
-    elif [[ -f /etc/os-release && $(grep -oP '(?<=^ID=).+' /etc/os-release) == "ubuntu" ]]; then
-        sudo apt update
-        sudo apt install -y software-properties-common
-        sudo apt-add-repository --yes --update ppa:ansible/ansible
-        sudo apt install -y ansible
-    else
-        echo "Unsupported OS. Please install Ansible manually."
-        exit 1
-    fi
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
 }
 
-# Install Ansible if not already installed
-if ! command -v ansible &> /dev/null; then
-    install_ansible
+# Install Ansible and its dependencies if not already installed
+if ! command_exists ansible; then
+    # Install Homebrew (macOS) or Update apt cache (Ubuntu)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    else
+        sudo apt update
+    fi
+
+    # Install Ansible and dependencies
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install ansible
+    else
+        sudo apt install -y ansible
+    fi
 fi
 
 # Run Ansible playbook

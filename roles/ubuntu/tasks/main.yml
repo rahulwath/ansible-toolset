@@ -6,20 +6,22 @@
   become: yes
   when: ansible_os_family == "Debian"
 
-- name: Install podman-compose on Ubuntu
-  apt:
+- name: Install podman-compose
+  ansible.builtin.pip:
     name: podman-compose
     state: present
   become: yes
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" 
 
 - name: Install Flatpak and Podman Desktop on Ubuntu
   hosts: all
   become: yes
+  when: ansible_os_family == "Debian"
   tasks:
     - name: Install flatpak
       community.general.flatpak:
         state: present
+
 
     - name: Add Flathub remote
       community.general.flatpak_remote:
