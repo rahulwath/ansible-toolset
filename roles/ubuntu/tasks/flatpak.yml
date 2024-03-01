@@ -1,0 +1,25 @@
+---
+- name: Install Podman Desktop using Flatpak
+  hosts: all
+  become: true
+  tasks:
+    # Install flatpak and flathub
+    - name: Install flatpak
+      apt: 
+        name: flatpak
+        state: present
+
+    - name: Install flathub remote
+      command: flatpak remote --add flathub https://flathub.org/repo/flathub.flatpakref
+
+    # Install Podman Desktop
+    - name: Install Podman Desktop
+      flatpak:
+        name: io.containers.podman.desktop
+        remote: flathub
+        state: present
+
+    # Grant access to system resources (optional)
+    - name: Allow access to system resources (optional)
+      command: flatpak --user override --filesystem=host 
+      when: not ansible_virtualization_type in ['docker', 'lxc']
