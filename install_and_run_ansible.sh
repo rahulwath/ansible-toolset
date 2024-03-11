@@ -19,9 +19,14 @@ if ! command_exists ansible; then
         brew install ansible
     else
         sudo apt install -y ansible
+        sudo apt install flatpak -y
     fi
 fi
 
 # Run Ansible playbook
 echo "Running Ansible playbook..."
-ansible-playbook -i inventory/ playbook.yml
+ansible-playbook -i inventory/ playbook.yml --ask-become-pass
+
+
+
+

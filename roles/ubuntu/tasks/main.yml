@@ -13,3 +13,9 @@
   become: yes
   when: ansible_os_family == "Debian" 
 
+- name: Add flathub remote
+  command: flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+
+# Install Podman Desktop
+- name: Install Podman Desktop
+  command: flatpak install --user -y io.podman_desktop.PodmanDesktop

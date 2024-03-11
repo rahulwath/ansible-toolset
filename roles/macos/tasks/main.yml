@@ -1,4 +1,11 @@
 ---
+- name: Install podman for macOS
+  homebrew:
+    name: podman
+    state: present
+  become: yes
+  when: ansible_os_family == "Darwin"
+  
 - name: Install Podman Desktop for macOS
   homebrew:
     name: podman
