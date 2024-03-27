@@ -1,22 +1,36 @@
 ---
-- name: Install podman for macOS
-  homebrew:
-    name: podman
-    state: present
-  become: yes
-  when: ansible_os_family == "Darwin"
-  
-- name: Install Podman Desktop for macOS
-  homebrew:
-    name: podman
-    state: present
-  become: yes
-  when: ansible_os_family == "Darwin"
+    - name: Install Podman
+      command: brew install podman
+      args:
+        creates: /usr/local/bin/podman
+      register: podman_install_result
 
-- name: Install podman-compose for macOS
-  homebrew:
-    name: podman-compose
-    state: present
-  become: yes
-  when: ansible_os_family == "Darwin"
+    - name: Install Podman Compose
+      command: brew install podman-compose
+      args:
+        creates: /usr/local/bin/podman-compose
+      register: podman_compose_install_result
 
+    - name: Install Podman Desktop
+      command: brew install podman-desktop
+      args:
+        creates: /Applications/Podman.app
+      register: podman_desktop_install_result
+
+    - name: Initialise Podman machine
+      command: podman machine init
+
+    - name: Start Podman Services
+      command: podman machine start
+
+    - name: Check Podman Machine Status
+      command: podman machine ls
+      register: podman_machine_status
+
+    - name: Print Installation and Service Status
+      debug:
+        msg: |
+         Podman Installed: {{ 'Yes' if podman_install_result.changed else 'No' }}
+         Podman Compose Installed: {{ 'Yes' if podman_compose_install_result.changed else 'No' }}
+         Podman Desktop Installed: {{ 'Yes' if podman_desktop_install_result.changed else 'No' }}ßß
+         Podman Service Status: {{ podman_machine_status.stdout | default('Service status not available') }}
