@@ -1,3 +1,3 @@
 ---
 - include_tasks: main1.yml
-- include_tasks: podman_rootless_setup.yaml 
+- include_tasks: podman_rootless_setup.yaml

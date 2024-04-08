@@ -1,43 +1,31 @@
 ---
-- name: Setup Podman in Rootless Environment
-  hosts: all
-  become: yes
-  vars:
-    subuid_range_start: 100000
-    subuid_range_end: 165535
-    subgid_range_start: 100000
-    subgid_range_end: 165535
-    additional_group: 2000
-    ping_group_range_max_gid: 2000000
+- name: Install required packages
+  package:
+    name: slirp4netns
+    state: present
 
-  tasks:
-    - name: Install required packages
-      package:
-        name: slirp4netns
-        state: present
+- name: Add subuids and subgids for root user
+  command: "usermod --add-subuids 100000-165535 --add-subgids 100000-165535 root"
+  become_user: root
 
-    - name: Add subuids and subgids for root user
-      command: "usermod --add-subuids {{ subuid_range_start }}-{{ subuid_range_end }} --add-subgids {{ subgid_range_start }}-{{ subgid_range_end }} root"
-      become_user: root
+- name: Add additional group for root user
+  command: "usermod --add-subgids 2000-2000 root"
+  become_user: root
 
-    - name: Add additional group for root user
-      command: "usermod --add-subgids {{ additional_group }}-{{ additional_group }} root"
-      become_user: root
+- name: Enable unprivileged ping
+  block:
+    - name: Check if ping_group_range already set
+      command: "grep '^net.ipv4.ping_group_range' /etc/sysctl.conf"
+      register: ping_group_range_check
+      failed_when: false
 
-    - name: Enable unprivileged ping
-      block:
-        - name: Check if ping_group_range already set
-          command: "grep '^net.ipv4.ping_group_range' /etc/sysctl.conf"
-          register: ping_group_range_check
-          failed_when: false
+    - name: Set ping_group_range
+      lineinfile:
+        path: /etc/sysctl.conf
+        line: "net.ipv4.ping_group_range=0 2000000"
+        create: yes
+      when: ping_group_range_check.rc != 0
 
-        - name: Set ping_group_range
-          lineinfile:
-            path: /etc/sysctl.conf
-            line: "net.ipv4.ping_group_range=0 {{ ping_group_range_max_gid }}"
-            create: yes
-          when: ping_group_range_check.rc != 0
-
-        - name: Apply changes to sysctl
-          command: "sysctl -p"
+    - name: Apply changes to sysctl
+      command: "sysctl -p"
 
