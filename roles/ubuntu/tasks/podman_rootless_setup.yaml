@@ -9,6 +9,7 @@
     subgid_range_end: 165535
     additional_group: 2000
     ping_group_range_max_gid: 2000000
+    default_xdg_config_home: "{{ ansible_env.HOME + '/.config' }}"  # Default XDG_CONFIG_HOME if not set
 
   tasks:
     - name: Install required packages
@@ -17,15 +18,14 @@
         state: present
       loop:
         - podman
-        - shadow-utils  # or newuid for managing subuids and subgids
         - slirp4netns
 
-    - name: Add subuids and subgids for user
-      command: "usermod --add-subuids {{ subuid_range_start }}-{{ subuid_range_end }} --add-subgids {{ subgid_range_start }}-{{ subgid_range_end }} {{ ansible_user }}"
+    - name: Add subuids and subgids for root user
+      command: "usermod --add-subuids {{ subuid_range_start }}-{{ subuid_range_end }} --add-subgids {{ subgid_range_start }}-{{ subgid_range_end }} root"
       become_user: root
 
-    - name: Add additional group for user
-      command: "usermod --add-subgids {{ additional_group }}-{{ additional_group }} {{ ansible_user }}"
+    - name: Add additional group for root user
+      command: "usermod --add-subgids {{ additional_group }}-{{ additional_group }} root"
       become_user: root
 
     - name: Enable unprivileged ping
@@ -44,37 +44,4 @@
 
         - name: Apply changes to sysctl
           command: "sysctl -p"
-
-    - name: Create XDG_CONFIG_HOME directory if not exists
-      file:
-        path: "{{ lookup('env', 'XDG_CONFIG_HOME') }}"
-        state: directory
-        mode: '0700'
-      register: xdg_config_home
-      changed_when: false
-
-    - name: Copy Podman configuration files to XDG_CONFIG_HOME
-      copy:
-        src: "{{ item.src }}"
-        dest: "{{ lookup('env', 'XDG_CONFIG_HOME') }}/containers/{{ item.dest }}"
-        mode: '0600'
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-      loop:
-        - { src: '/usr/share/containers/containers.conf', dest: 'containers.conf' }
-        - { src: '/usr/share/containers/storage.conf', dest: 'storage.conf' }
-        - { src: '/etc/containers/registries.conf', dest: 'registries.conf' }
-
-    - name: Create authorization file
-      file:
-        path: "{{ lookup('env', 'XDG_RUNTIME_DIR') }}/containers/auth.json"
-        state: touch
-        mode: '0600'
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-      changed_when: false
-
-    - name: Print configuration files path
-      debug:
-        msg: "Podman configuration files are located at {{ lookup('env', 'XDG_CONFIG_HOME') }}/containers/"
 
