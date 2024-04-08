@@ -19,3 +19,25 @@
 # Install Podman Desktop
 - name: Install Podman Desktop
   command: flatpak install --user -y io.podman_desktop.PodmanDesktop
+
+- name: Check Podman Status
+  command: podman --version
+  register: podman_status
+  ignore_errors: true
+
+- name: Check Podman Compose Status
+  command: podman-compose --version
+  register: podman_compose_status
+  ignore_errors: true
+
+- name: Check Podman Desktop Status
+  command: flatpak list
+  register: flatpak_list_output
+  changed_when: false
+
+- name: Print Status
+  debug:
+    msg: |
+      Podman Status: {{ 'Installed and Running' if podman_status.rc == 0 else 'Not Installed or Not Running' }}
+      Podman Compose Status: {{ 'Installed and Running' if podman_compose_status.rc == 0 else 'Not Installed or Not Running' }}
+      Podman Desktop Status: {{ 'Installed' if 'io.podman_desktop.PodmanDesktop' in flatpak_list_output.stdout else 'Not Installed' }}
