@@ -9,16 +9,12 @@
     subgid_range_end: 165535
     additional_group: 2000
     ping_group_range_max_gid: 2000000
-    default_xdg_config_home: "{{ ansible_env.HOME + '/.config' }}"  # Default XDG_CONFIG_HOME if not set
 
   tasks:
     - name: Install required packages
       package:
-        name: "{{ item }}"
+        name: slirp4netns
         state: present
-      loop:
-        - podman
-        - slirp4netns
 
     - name: Add subuids and subgids for root user
       command: "usermod --add-subuids {{ subuid_range_start }}-{{ subuid_range_end }} --add-subgids {{ subgid_range_start }}-{{ subgid_range_end }} root"
